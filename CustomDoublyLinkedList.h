@@ -15,14 +15,12 @@ private:
             IsBorder = true;
         }
 
-        DoublyLinkedElement(T object, DoublyLinkedElement *previous) {
-            IsBorder = false;
-            Object = object;
+        DoublyLinkedElement(DoublyLinkedElement *previous) {
+            IsBorder = true;
             Previous = previous;
-            Next = new DoublyLinkedElement();
         }
 
-        DoublyLinkedElement(T object, DoublyLinkedElement &next, DoublyLinkedElement *previous) {
+        DoublyLinkedElement(T object, DoublyLinkedElement *next, DoublyLinkedElement *previous) {
             IsBorder = false;
             Object = object;
             Next = next;
@@ -40,8 +38,9 @@ public:
     CustomDoublyLinkedList() {
         countOfElements = 0;
         firstElement = new DoublyLinkedElement();
+        firstElement->Next = new DoublyLinkedElement(firstElement);
         currentElement = firstElement;
-        lastElement = firstElement;
+        lastElement = firstElement->Next;
     }
 
     ~CustomDoublyLinkedList() {
@@ -54,12 +53,13 @@ public:
 
     void Add(T object) {
         if (countOfElements == 0) {
-            currentElement = new DoublyLinkedElement(object, firstElement);
+            currentElement = new DoublyLinkedElement(object, firstElement, lastElement);
             firstElement->Next = currentElement;
+            lastElement->Previous = currentElement;
             firstElement = currentElement;
             lastElement = currentElement;
         } else {
-            lastElement->Next = new DoublyLinkedElement(object, lastElement);
+            lastElement->Next = new DoublyLinkedElement(object, lastElement->Next, lastElement);
             lastElement = lastElement->Next;
         }
         countOfElements++;
@@ -126,8 +126,28 @@ public:
         countOfElements--;
     }
 
+    void InsertAfterCurrent(T object) {
+        if(countOfElements == 0){
+            Add(object);
+        }
+        else{
+            currentElement = new DoublyLinkedElement(object, currentElement->Next, currentElement);
+            countOfElements++;
+        }
+    }
+
+    void InsertBeforeCurrent(T object) {
+        if(countOfElements == 0){
+            Add(object);
+        }
+        else{
+            currentElement = new DoublyLinkedElement(object, currentElement, currentElement->Previous);
+            countOfElements++;
+        }
+    }
+
     bool IsBorderReached() {
-        return currentElement->IsBorder;
+        return currentElement->IsBorder || currentElement->Next->IsBorder;
     }
 
     int GetCount() {
